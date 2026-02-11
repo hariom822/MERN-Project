@@ -36,9 +36,7 @@ export default function User({ setOpenUser })
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
-    
   }
-
   const profiledata=()=>{
     navigate("/profile")
   }
@@ -63,7 +61,7 @@ export default function User({ setOpenUser })
           onClick={logout}
           className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
         >
-          Logout
+          Logout 
         </li>
       </ul>
     </div>
