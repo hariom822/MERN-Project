@@ -16,6 +16,9 @@ import Course from "./components/Course";
 import Employee from "./components/Employee";
 import Skill from "./components/Skill";
 import Student from "./components/Student";
+import Tutors from "./components/Tutors";
+import Batch from "./components/Batch";
+import Visitors from "./components/Visitors";
 export default function App() {
   return (
     <BrowserRouter>
@@ -28,15 +31,19 @@ export default function App() {
         <Route path="/employee" element={<Employee />} />
         <Route path="/addemployee" element={<AddEmployee />} />
         <Route path="/addcourse" element={<AddCourse />} />
+        <Route path="/tutors" element={<Tutors />} />
         <Route path="/student" element={<Student />} />
+          <Route path="/visitors" element={<Visitors />} />
           <Route path="/course" element={<Course />} />
           <Route path="/skill" element={<Skill />} />
+          <Route path="/batch" element={<Batch />} />
         <Route path="/forget" element={<ForgetPassword />} />
           <Route path="/reset" element={<Reset />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/user" element={<User />} />
         <Route path="/sidebar" element={<Sidebar />} />
         <Route path="/addskill" element={<AddSkill />} />
+
         {/* <Route path="/signup" element={<Signup />} /> */}
       </Routes>
     </BrowserRouter>

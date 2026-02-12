@@ -92,17 +92,13 @@ export default function Header() {
   }, []);
 
   const fetchUser = async () => {
-    try {
+     try {
       const token = localStorage.getItem("token");
-
-      const res = await axios.get(
-        `http://localhost:8000/users/oneuser/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+    const res=await axios.get(`http://localhost:8000/users/oneuser/${id}`, {
+      headers: {
+        Authorization: `Bearer ${token}`, 
+      },
+    })
 
       setUserdata(res.data.user);
     } catch (error) {

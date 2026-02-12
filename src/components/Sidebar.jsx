@@ -17,7 +17,7 @@ export default function Sidebar({ closeSidebar }) {
       {/* Overlay */}
       <div
         onClick={closeSidebar}
-        className="absolute inset-0  bg-opacity-40"
+        className="absolute inset-0  bg-opacity-10"
       ></div>
 
       {/* Sidebar Panel */}
@@ -100,7 +100,39 @@ export default function Sidebar({ closeSidebar }) {
               Student
             </button>
           </li>
-
+           <li>
+            <button
+              onClick={() => {
+                navigate("/tutors");
+                closeSidebar();
+              }}
+              className={menuItemClass("/tutors")}
+            >
+              tutors
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => {
+                navigate("/batch");
+                closeSidebar();
+              }}
+              className={menuItemClass("/batch")}
+            >
+              Batch
+            </button>
+          </li>
+           <li>
+            <button
+              onClick={() => {
+                navigate("/visitors");
+                closeSidebar();
+              }}
+              className={menuItemClass("/visitors")}
+            >
+              Visitor
+            </button>
+          </li>
           <li>
             <button
               onClick={() => {

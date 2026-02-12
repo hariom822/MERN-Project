@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Pencil, Trash2, Power, RotateCcw } from "lucide-react";
 
 export default function Course() {
   const [courses, setCourses] = useState([]);
@@ -184,14 +185,14 @@ const dataAdit = async (e) => {
   }}
   className="text-indigo-600 hover:text-indigo-800"
 >
-  Edit
+  <Pencil size={18} />
 </button>
 
                         <button
                         onClick={() =>coursedelete(course._id)}
                         className="text-red-600 hover:text-red-800 ml-4"
                         >
-                            Delete
+                            <Trash2 size={18} />
                         </button>
                   </td>
                 </tr>

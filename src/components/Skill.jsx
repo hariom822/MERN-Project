@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Pencil, Trash2, Power, RotateCcw } from "lucide-react";
 
 export default function Skill() {
   const [skills, setSkills] = useState([]);
@@ -174,14 +175,14 @@ export default function Skill() {
                       }}
                       className="text-indigo-600"
                     >
-                      Edit
+                      <Pencil size={18} />
                     </button>
 
                     <button
                       onClick={() => handleDelete(skill._id)}
                       className="text-red-600"
                     >
-                      Delete
+                       <Trash2 size={18} />
                     </button>
                   </td>
                 </tr>

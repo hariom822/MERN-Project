@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { Pencil, Trash2, Power, RotateCcw } from "lucide-react";
 
 export default function Student() {
   const token = localStorage.getItem("token");
@@ -36,6 +37,7 @@ export default function Student() {
       }
       );
       setStudents(res.data);
+    //   console.log(res.data);
     } catch (err) {
       setError("Failed to load students");
     } finally {
@@ -219,14 +221,14 @@ export default function Student() {
         <table className="min-w-full">
           <thead className="bg-indigo-600 text-white">
             <tr>
-              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-2 py-3 text-left">Name</th>
               <th>Email</th>
               <th>Phone</th>
               <th>Course</th>
               <th>Fees</th>
               <th>Status</th>
               <th>Date</th>
-              <th>Action</th>
+              <th className="pr-15">Action</th>
             </tr>
           </thead>
 
@@ -240,16 +242,16 @@ export default function Student() {
             ) : (
               filtered.map((student) => (
                 <tr key={student._id} className="border-b">
-                  <td className="px-4 py-3">{student.name}</td>
+                  <td className="px-5 py-3 text-left">{student.name}</td>
                   <td>{student.email}</td>
                   <td>{student.phone}</td>
-                  <td>{student.course?.name}</td>
+                  <td>{student.course?.coursename}</td>
                   <td>₹{student.fees}</td>
                   <td>{student.status}</td>
                   <td>
                     {new Date(student.date).toLocaleDateString()}
                   </td>
-                  <td className="space-x-2">
+                  <td className="space-x-2 pl-10">
                     <button
                       onClick={() => {
                         setEditStudent(student);
@@ -257,7 +259,7 @@ export default function Student() {
                       }}
                       className="text-indigo-600"
                     >
-                      Edit
+                      <Pencil size={18} />
                     </button>
                     <button
                         onClick={() =>
@@ -265,7 +267,7 @@ export default function Student() {
                         }
                         className="text-red-600"
                       >
-                        delete
+                        <Trash2 size={18} />
                       </button>
                     {view === "active" ? (
                       <button
@@ -274,7 +276,7 @@ export default function Student() {
                         }
                         className="text-red-600"
                       >
-                        inactive
+                        <Power size={18} />
                       </button>
                     ) : (
                       <button
@@ -283,7 +285,7 @@ export default function Student() {
                         }
                         className="text-green-600"
                       >
-                        active
+                        <RotateCcw size={18}/>
                       </button>
                     )}
                   </td>

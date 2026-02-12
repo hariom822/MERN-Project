@@ -1,367 +1,403 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
-import {useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Pencil, Trash2, Power, RotateCcw } from "lucide-react";
 export default function Employee() {
+
+  const token = localStorage.getItem("token");
+
   const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showPopup, setShowPopup] = useState(false);
-  const [showaddemployee, setShowAddEmployee] = useState(false);
-  const [editId, setEditId] = useState(null);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [search, setSearch] = useState("");
+  const [showInactive, setShowInactive] = useState(false);
+  const [sortField, setSortField] = useState("name");
+  const [showAddPopup, setShowAddPopup] = useState(false);
+  const [showEditPopup, setShowEditPopup] = useState(false);
+
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   const [form, setForm] = useState({
     name: "",
+    email: "",
     phone: "",
     salary: "",
     menttype: "",
     pannumbert: "",
-    status: ""
+    status: "active"
   });
-const navigate=useNavigate()
-  const getAllEmployees = async () => {
+
+  const [addherimage, setAddherImage] = useState(null);
+  const [profileimage, setProfileImage] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  useEffect(() => {
+    filterData();
+  }, [employees, search, showInactive, sortField]);
+
+  // 🔹 Fetch
+  const fetchEmployees = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/employe/allemployee");
+      const res = await axios.get(
+        "http://localhost:8000/employe/allemployee",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       setEmployees(res.data);
     } catch (err) {
-      console.log(err);
+      setError("Failed to load employees");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    getAllEmployees();
-  }, []);
+  // 🔹 Filter + Sort
+  const filterData = () => {
+    let data = [...employees];
 
-  // 🔹 OPEN EDIT POPUP
-  const openEditPopup = (emp) => {
-    setEditId(emp._id);
-    setForm({
-      name: emp.name || "",
-      phone: emp.phone || "",
-      salary: emp.salary || "",
-      menttype: emp.menttype || "",
-      pannumbert: emp.pannumbert || "",
-      status: emp.status || ""
-    });
-    setShowPopup(true);
+    data = data.filter(emp =>
+      showInactive
+        ? emp.status === "inactive"
+        : emp.status === "active"
+    );
+
+    if (search) {
+      data = data.filter(emp =>
+        emp.name.toLowerCase().includes(search.toLowerCase()) ||
+        emp.email.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    data.sort((a, b) =>
+      a[sortField]?.toString().localeCompare(
+        b[sortField]?.toString()
+      )
+    );
+
+    setFilteredEmployees(data);
   };
-  const [addemployee, setAddEmployee] = useState({
-  name: "",
-  email: "",
-  phone: "",
-  salary: "",
-  menttype: "",
-  pannumbert: ""
-});
 
-const [addherimage, setAddherImage] = useState(null);
-const [profileimage, setProfileImage] = useState(null);
-const [addLoading, setAddLoading] = useState(false);
-const [addError, setAddError] = useState("");
-const handleAddEmployee = async (e) => {
-  e.preventDefault();
-  setAddLoading(true);
-  setAddError("");
+  // 🔹 Add Employee
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    setError("");
 
-  try {
-    const formData = new FormData();
-    formData.append("name", addemployee.name);
-    formData.append("email", addemployee.email);
-    formData.append("phone", addemployee.phone);
-    formData.append("salary", addemployee.salary);
-    formData.append("menttype", addemployee.menttype);
-    formData.append("pannumbert", addemployee.pannumbert);
-    formData.append("addherimage", addherimage);
-    formData.append("profileimage", profileimage);
+    try {
+      const formData = new FormData();
+      Object.keys(form).forEach(key => {
+        formData.append(key, form[key]);
+      });
 
-    const token = localStorage.getItem("token");
+      formData.append("addherimage", addherimage);
+      formData.append("profileimage", profileimage);
 
-    const res = await fetch("http://localhost:8000/employe/", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      body: formData,
-    });
+      await axios.post(
+        "http://localhost:8000/employe/",
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Employee add failed");
+      setShowAddPopup(false);
+      fetchEmployees();
 
-    alert("Employee added successfully ✅");
-    setShowAddEmployee(false);
-    getAllEmployees();
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to add employee");
+    }
+  };
 
-    // reset form
-    setAddEmployee({
+  // 🔹 Edit Employee
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(
+        `http://localhost:8000/employe/updateemployee/${selectedEmployee._id}`,
+        form,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setShowEditPopup(false);
+      fetchEmployees();
+    } catch {
+      setError("Failed to update employee");
+    }
+  };
+
+  // 🔹 Toggle Active / Inactive
+  const toggleStatus = async (id, currentStatus) => {
+    try {
+   await axios.post(
+  `http://localhost:8000/employe/ststusemployee/${id}`,
+  {},   
+  {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+);
+
+      fetchEmployees();
+    } catch (err) {
+      setError("Failed to update status");
+    }
+  };
+
+  return (
+    <div className="p-6 bg-gray-100 min-h-screen">
+
+      <h1 className="text-2xl font-bold mb-6">
+        Employee Management
+      </h1>
+
+      {error && (
+        <p className="text-red-500 mb-4">{error}</p>
+      )}
+
+      {/* Active / Inactive */}
+      <div className="flex gap-4 mb-4">
+        <button
+          onClick={() => setShowInactive(false)}
+          className={`px-4 py-2 rounded-lg ${
+            !showInactive ? "bg-green-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          Active
+        </button>
+
+        <button
+          onClick={() => setShowInactive(true)}
+          className={`px-4 py-2 rounded-lg ${
+            showInactive ? "bg-red-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          Inactive
+        </button>
+      </div>
+
+      {/* Search + Add */}
+      <div className="flex justify-between mb-6">
+        <input
+          placeholder="Search employee..."
+          value={search}
+          onChange={(e)=>setSearch(e.target.value)}
+          className="border px-4 py-2 rounded-lg w-64"
+        />
+
+       <button
+  onClick={() => {
+    setForm({
       name: "",
       email: "",
       phone: "",
       salary: "",
       menttype: "",
-      pannumbert: ""
+      pannumbert: "",
+      status: "active"
     });
     setAddherImage(null);
     setProfileImage(null);
+    setShowAddPopup(true);
+  }}
+  className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
+>
+  + Add Employee
+</button>
 
-  } catch (err) {
-    setAddError(err.message);
-  } finally {
-    setAddLoading(false);
-  }
-};
+      </div>
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+      {/* TABLE */}
+      <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
+        <table className="min-w-full">
+          <thead className="bg-indigo-600 text-white">
+            <tr>
+              <th className="px-4 py-3">Profile</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Salary</th>
+              <th>Type</th>
+              <th>PAN</th>
+              <th>Aadhar</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
 
-  // 🔹 UPDATE EMPLOYEE (same API)
- const handleUpdate = async (e) => {
-  e.preventDefault();
-  try {
-    const token = localStorage.getItem("token");
-
-    await axios.put(
-      `http://localhost:8000/employe/updateemployee/${editId}`,
-      form,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    alert("Employee updated ✅");
-    setShowPopup(false);
-    getAllEmployees();
-  } catch (err) {
-    console.log(err.response?.data || err.message);
-    alert("Update failed ❌");
-  }
-};
-
-  // 🔹 DELETE EMPLOYEE (same)
-  const handlestatus = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
-    try {
-      const token = localStorage.getItem("token");
-            await axios.delete(
-        `http://localhost:8000/employe/deleteemployee/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      getAllEmployees();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  return (
-    <div className="w-full ">
-     <div className="flex items-center justify-between mb-6 p-5">
-       <h1 className="text-2xl font-bold mb-6 text-gray-800">
-        Employee Dashboard
-      </h1>
-       <button
-          onClick={()=>setShowAddEmployee(true)}
-          className="w-30  h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center cursor-pointer "
-        >
-          Add Employee
-        </button>
-     </div>
-      {loading ? (
-        <p className="text-center">Loading employees...</p>
-      ) : (
-        <div className="overflow-x-auto bg-white rounded-xl shadow-lg">
-          <table className="min-w-full border-collapse">
-            <thead className="bg-indigo-600 text-white">
+          <tbody>
+            {loading ? (
               <tr>
-                <th className="px-4 py-3">Profile</th>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Salary</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">PAN</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Join Date</th>
-                <th className="px-4 py-3 text-center">Actions</th>
+                <td colSpan="10" className="text-center py-6">
+                  Loading...
+                </td>
               </tr>
-            </thead>
+            ) : filteredEmployees.map(emp => (
+              <tr key={emp._id} className="border-b">
+                <td className="px-4 py-3">
+                  <img
+                    src={emp.profileimage}
+                    className="w-12 h-12 rounded-full object-cover"
+                    alt=""
+                  />
+                </td>
+                <td>{emp.name}</td>
+                <td>{emp.email}</td>
+                <td>{emp.phone}</td>
+                <td>₹{emp.salary}</td>
+                <td>{emp.menttype}</td>
+                <td>{emp.pannumbert}</td>
+                <td>
+                  <img
+                    src={emp.addherimage}
+                    className="w-12 h-12 object-cover"
+                    alt=""
+                  />
+                </td>
+                <td>
+                  <span className={`px-2 py-1 text-xs rounded-full ${
+                    emp.status === "active"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-red-100 text-red-700"
+                  }`}>
+                    {emp.status}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    onClick={()=>{
+                      setSelectedEmployee(emp);
+                      setForm(emp);
+                      setShowEditPopup(true);
+                    }}
+                    className="text-indigo-600 mr-3"
+                  >
+                    <Pencil size={18} />
+                  </button>
 
-            <tbody>
-              {employees.map((emp) => (
-                <tr key={emp._id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <img
-                      src={emp.profileimage}
-                      className="w-12 h-12 rounded-full"
-                      alt=""
-                    />
-                  </td>
-                  <td className="px-4 py-3">{emp.name}</td>
-                  <td className="px-4 py-3">{emp.email}</td>
-                  <td className="px-4 py-3">{emp.phone}</td>
-                  <td className="px-4 py-3">₹ {emp.salary}</td>
-                  <td className="px-4 py-3">{emp.menttype}</td>
-                  <td className="px-4 py-3">{emp.pannumbert}</td>
-                  <td className="px-4 py-3">{emp.status}</td>
-                  <td className="px-4 py-3">
-                    {new Date(emp.joindate).toLocaleDateString()}
-                  </td>
+                  <button
+                    onClick={()=>toggleStatus(emp._id, emp.status)}
+                    className="text-red-600"
+                  >
+                    {emp.status === "active" ? <Power size={18} /> :<RotateCcw size={18} />}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/* ADD / EDIT POPUP */}
+{(showAddPopup || showEditPopup) && (
+  <div className="fixed inset-0 bg-opacity-40 flex justify-center items-center z-50">
+    <div className="bg-white w-full max-w-md rounded-xl shadow-xl p-6">
 
-                  <td className="px-4 py-3 text-center space-x-2">
-                    <button
-                      onClick={() => openEditPopup(emp)}
-                      className="px-3 py-1 bg-blue-600 text-white rounded text-sm"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handlestatus(emp._id)}
-                      className="px-3 py-1 bg-red-600 text-white rounded text-sm"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-     {showaddemployee && ( <div className="fixed inset-0 flex justify-center items-start mt-24 z-50">
-      <div className="max-w-4xl mx-auto bg-white p-8 mt-5 rounded-xl shadow-lg">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">
-        Add New Employee
+      <h2 className="text-xl font-bold mb-4">
+        {showAddPopup ? "Add Employee" : "Edit Employee"}
       </h2>
-     <form onSubmit={handleAddEmployee}
-      className="grid grid-cols-1 md:grid-cols-2 gap-4">
-       <input
-  placeholder="Name"
-  className="border p-2 rounded"
-  value={addemployee.name}
-  onChange={(e) =>
-    setAddEmployee({ ...addemployee, name: e.target.value })
-  }
-/>
 
-<input
-  placeholder="Email"
-  className="border p-2 rounded"
-  value={addemployee.email}
-  onChange={(e) =>
-    setAddEmployee({ ...addemployee, email: e.target.value })
-  }
-/>
+      {error && (
+        <p className="text-red-500 mb-3 text-sm">{error}</p>
+      )}
 
-<input
-  placeholder="Phone"
-  className="border p-2 rounded"
-  value={addemployee.phone}
-  onChange={(e) =>
-    setAddEmployee({ ...addemployee, phone: e.target.value })
-  }
-/>
+      <form
+        onSubmit={showAddPopup ? handleAdd : handleEdit}
+        className="space-y-3"
+      >
 
-<input
-  placeholder="Salary"
-  className="border p-2 rounded"
-  value={addemployee.salary}
-  onChange={(e) =>
-    setAddEmployee({ ...addemployee, salary: e.target.value })
-  }
-/>
+        <input
+          placeholder="Name"
+          value={form.name}
+          onChange={(e)=>setForm({...form,name:e.target.value})}
+          className="w-full border px-3 py-2 rounded"
+          required
+        />
 
-<select
-  className="border p-2 rounded"
-  value={addemployee.menttype}
-  onChange={(e) =>
-    setAddEmployee({ ...addemployee, menttype: e.target.value })
-  }
->
-  <option value="">Select Type</option>
-  <option value="fulltime">Full Time</option>
-  <option value="parttime">Part Time</option>
-</select>
+        <input
+          placeholder="Email"
+          value={form.email}
+          onChange={(e)=>setForm({...form,email:e.target.value})}
+          className="w-full border px-3 py-2 rounded"
+          required
+        />
 
-<input
-  placeholder="PAN Number"
-  className="border p-2 rounded"
-  value={addemployee.pannumbert}
-  onChange={(e) =>
-    setAddEmployee({ ...addemployee, pannumbert: e.target.value })
-  }
-/>
+        <input
+          placeholder="Phone"
+          value={form.phone}
+          onChange={(e)=>setForm({...form,phone:e.target.value})}
+          className="w-full border px-3 py-2 rounded"
+        />
 
-<input
-  type="file"
-  onChange={(e) => setAddherImage(e.target.files[0])}
-/>
+        <input
+          placeholder="Salary"
+          value={form.salary}
+          onChange={(e)=>setForm({...form,salary:e.target.value})}
+          className="w-full border px-3 py-2 rounded"
+        />
 
-<input
-  type="file"
-  onChange={(e) => setProfileImage(e.target.files[0])}
-/>
+        <input
+          placeholder="Employment Type"
+          value={form.menttype}
+          onChange={(e)=>setForm({...form,menttype:e.target.value})}
+          className="w-full border px-3 py-2 rounded"
+        />
 
-       <button
-  type="submit"
-  disabled={addLoading}
-  className="bg-indigo-600 text-white px-4 py-2 rounded"
->
-  {addLoading ? "Saving..." : "Add Employee"}
-</button>
+        <input
+          placeholder="PAN Number"
+          value={form.pannumbert}
+          onChange={(e)=>setForm({...form,pannumbert:e.target.value})}
+          className="w-full border px-3 py-2 rounded"
+        />
 
-<button
-  type="button"
-  onClick={() => setShowAddEmployee(false)}
-  className="bg-gray-300 px-4 py-2 rounded"
->
-  Cancel
-</button>
+        {showAddPopup && (
+          <>
+            <div>
+              <label className="text-sm text-gray-600">Aadhar Image</label>
+              <input
+                type="file"
+                onChange={(e)=>setAddherImage(e.target.files[0])}
+                className="w-full"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-gray-600">Profile Image</label>
+              <input
+                type="file"
+                onChange={(e)=>setProfileImage(e.target.files[0])}
+                className="w-full"
+                required
+              />
+            </div>
+          </>
+        )}
+
+        <div className="flex justify-end gap-3 pt-3">
+          <button
+            type="button"
+            onClick={()=>{
+              setShowAddPopup(false);
+              setShowEditPopup(false);
+            }}
+            className="px-4 py-2 bg-gray-300 rounded"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            className="px-4 py-2 bg-indigo-600 text-white rounded"
+          >
+            {showAddPopup ? "Add" : "Update"}
+          </button>
+        </div>
 
       </form>
-      </div>
-      </div>)}
-      {showPopup && (
-        <div className="fixed inset-0 flex justify-center items-start mt-24 z-50">
-          <div
-            className="absolute  bg-opacity-20"
-            onClick={() => setShowPopup(false)}
-          ></div>
+    </div>
+  </div>
+)}
 
-          <div className="relative bg-white w-[420px] p-6 rounded-xl shadow-xl">
-            <h2 className="text-lg font-bold mb-4">Edit Employee</h2>
-
-            <form onSubmit={handleUpdate} className="grid gap-3">
-              <input name="name" value={form.name} onChange={handleChange} className="border p-2 rounded" placeholder="Name" />
-              <input name="phone" value={form.phone} onChange={handleChange} className="border p-2 rounded" placeholder="Phone" />
-              <input name="salary" value={form.salary} onChange={handleChange} className="border p-2 rounded" placeholder="Salary" />
-
-              <select name="menttype" value={form.menttype} onChange={handleChange} className="border p-2 rounded">
-                <option value="fulltime">Full Time</option>
-                <option value="parttime">Part Time</option>
-              </select>
-
-              <input name="pannumbert" value={form.pannumbert} onChange={handleChange} className="border p-2 rounded" placeholder="PAN Number" />
-
-              <select name="status" value={form.status} onChange={handleChange} className="border p-2 rounded">
-                <option value="pending">Pending</option>
-                <option value="active">Active</option>
-              </select>
-
-              <div className="flex justify-end gap-3 mt-4">
-                <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded">
-                  Update
-                </button>
-                <button type="button" onClick={() => setShowPopup(false)} className="bg-gray-300 px-4 py-2 rounded">
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
