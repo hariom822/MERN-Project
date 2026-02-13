@@ -12,12 +12,12 @@ export default function Sidebar({ closeSidebar }) {
     }`;
 
   return (
-    <div className="fixed  z-50 flex">
+    <div className="fixed  z-50 flex max-h-screen overflow-x-auto overflow-y-auto">
       
       {/* Overlay */}
       <div
         onClick={closeSidebar}
-        className="absolute inset-0  bg-opacity-10"
+        className="absolute inset-0 overflow-x-auto  bg-opacity-10"
       ></div>
 
       {/* Sidebar Panel */}
@@ -136,6 +136,17 @@ export default function Sidebar({ closeSidebar }) {
           <li>
             <button
               onClick={() => {
+                navigate("/timetable");
+                closeSidebar();
+              }}
+              className={menuItemClass("/timetable")}
+            >
+              Timetable
+            </button>
+</li>
+          <li>
+            <button
+              onClick={() => {
                 navigate("/mapping");
                 closeSidebar();
               }}
@@ -146,7 +157,6 @@ export default function Sidebar({ closeSidebar }) {
           </li>
         </ul>
 
-        {/* Footer */}
         <div className="pt-6 border-t text-xs text-gray-400 text-center">
           © 2026 LMS Panel
         </div>

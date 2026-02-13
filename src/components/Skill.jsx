@@ -152,7 +152,6 @@ export default function Skill() {
               <th className="px-4 py-3 text-left">Action</th>
             </tr>
           </thead>
-
           <tbody>
             {loading ? (
               <tr>

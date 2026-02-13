@@ -19,6 +19,8 @@ import Student from "./components/Student";
 import Tutors from "./components/Tutors";
 import Batch from "./components/Batch";
 import Visitors from "./components/Visitors";
+import Timetable from "./components/Timetable.jsx";
+import Mapping from "./components/Mapping.jsx";
 export default function App() {
   return (
     <BrowserRouter>
@@ -30,8 +32,10 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/employee" element={<Employee />} />
         <Route path="/addemployee" element={<AddEmployee />} />
+        <Route path="/timetable" element={<Timetable />} />
         <Route path="/addcourse" element={<AddCourse />} />
         <Route path="/tutors" element={<Tutors />} />
+          <Route path="/mapping" element={<Mapping />} />
         <Route path="/student" element={<Student />} />
           <Route path="/visitors" element={<Visitors />} />
           <Route path="/course" element={<Course />} />

@@ -6,10 +6,14 @@ export default function Course() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [skills, setSkills] = useState([]);
  const [aditcourse, setAditCourse] = useState({
   _id: "",
   coursename: "",
   duration: "",
+  skill: "",
+  startDate:"",
+  endDate:"",
   fees: "",
   level: "beginner",
   description: "",
@@ -23,7 +27,10 @@ export default function Course() {
   const [form, setForm] = useState({
     coursename: "",
     duration: "",
+    skill: "",
     fees: "",
+    startDate:"",
+    endDate:"",
     level: "beginner",
     description: "",
   });
@@ -41,11 +48,22 @@ export default function Course() {
       setLoading(false);
     }
   };
-
+ const fetchSkills = async () => {
+    try {
+      const res = await axios.get(  
+        "http://localhost:8000/skill/findall"
+      );
+      setSkills(res.data);
+    }
+      catch (err) {
+        setError("Failed to load skills");
+      }
+  };
   useEffect(() => {
     fetchCourses();
+    fetchSkills();
   }, []);
-
+console.log(courses)
   const handleAddCourse = async (e) => {
     e.preventDefault();
     setError("");
@@ -61,6 +79,9 @@ export default function Course() {
       setForm({
         coursename: "",
         duration: "",
+        skill: "",
+        startDate:"",
+        endDate:"",
         fees: "",
         level: "beginner",
         description: "",
@@ -123,6 +144,7 @@ const dataAdit = async (e) => {
           <thead className="bg-indigo-600 text-white">
             <tr>
               <th className="px-4 py-3 text-left">Course Name</th>
+              <th className="px-4 py-3 text-left">Skill</th>
               <th className="px-4 py-3 text-left">Duration</th>
               <th className="px-4 py-3 text-left">Fees</th>
               <th className="px-4 py-3 text-left">Level</th>
@@ -159,6 +181,9 @@ const dataAdit = async (e) => {
                 >
                   <td className="px-4 py-3 font-medium">
                     {course.coursename}
+                  </td>
+                  <td className="px-4 py-3 font-medium">
+                    {course.skill?.name || "N/A"}
                   </td>
                   <td className="px-4 py-3">
                     {course.duration}
@@ -346,6 +371,23 @@ const dataAdit = async (e) => {
                 className="w-full border px-3 py-2 rounded"
                 required
               />
+              <input type="date" value={form.startDate} onChange={(e)=>setForm({...form,startDate:e.target.value})}
+              placeholder="Start Date"
+               className="w-full border px-3 py-2 rounded" />
+
+               <input type="date" value={form.endDate} onChange={(e)=>setForm({...form,endDate:e.target.value})}
+              placeholder="End Date"
+               className="w-full border px-3 py-2 rounded" />
+
+              <select name="skill" id="skill" className="w-full border px-3 py-2 rounded
+              " value={form.skill} onChange={(e)=>setForm({...form,skill:e.target.value})} required>
+                <option value="">Select Skill</option>
+                {skills.map((skill) => (
+                  <option key={skill._id} value={skill._id}>
+                    {skill.name}
+                  </option>
+                ))}
+              </select>
 
               <select
                 value={form.level}

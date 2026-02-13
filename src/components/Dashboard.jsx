@@ -50,7 +50,6 @@ export default function Dashboard() {
     }
   };
 
-  // 🔥 Calculations
   const activeStudents = students.filter(s => s.isactive);
   const trashStudents = students.filter(s => !s.isactive);
   const activeCourses = courses.filter(c => c.status === "active");
@@ -78,22 +77,18 @@ export default function Dashboard() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
 
-            <StatCard title="Employees" value={employees.length} color="bg-indigo-600" />
-            <StatCard title="Active Students" value={activeStudents.length} color="bg-green-600" />
-            <StatCard title="Trash Students" value={trashStudents.length} color="bg-red-600" />
-            <StatCard title="Courses" value={courses.length} color="bg-purple-600" />
-            <StatCard title="Revenue" value={`₹ ${totalRevenue}`} color="bg-orange-600" />
-
+            <StatCard title="Employees" value={employees.length} color="bg-black" />
+            <StatCard title="Active Students" value={activeStudents.length} color="bg-black" />
+            <StatCard title="Trash Students" value={trashStudents.length} color="bg-black" />
+            <StatCard title="Courses" value={courses.length} color="bg-black" />
+            <StatCard title="Revenue" value={`₹ ${totalRevenue}`} color="bg-black" />
           </div>
-
-          {/* RECENT STUDENTS */}
           <SectionTable
             title="Recent Students"
             data={students.slice(0, 5)}
             type="student"
           />
 
-          {/* RECENT EMPLOYEES */}
           <SectionTable
             title="Recent Employees"
             data={employees.slice(0, 5)}
