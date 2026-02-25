@@ -142,7 +142,7 @@ return (
         </button>
       </div>
       {aditpopup && (
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+        <div className="absolute inset-0  bg-opacity-40 flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-4">Update Profile</h3>
             <form>

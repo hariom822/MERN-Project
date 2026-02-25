@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Pencil, Trash2, Power, RotateCcw } from "lucide-react";
+import { Pencil, Power, RotateCcw,RefreshCcw } from "lucide-react";
 
 export default function Visitors() {
 
@@ -9,21 +9,34 @@ export default function Visitors() {
   const [visitors, setVisitors] = useState([]);
   const [courses, setCourses] = useState([]);
   const [filteredVisitors, setFilteredVisitors] = useState([]);
-
   const [search, setSearch] = useState("");
   const [showTrash, setShowTrash] = useState(false);
   const [sortField, setSortField] = useState("name");
-
+  const [profileimage, setProfileImage] = useState(null);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [showEditPopup, setShowEditPopup] = useState(false);
-
+  const [showConvertPopup, setShowConvertPopup] = useState(false);
+  const [studentdata, setStudentData] = useState({
+      courseprice: "",
+      paymenttype: "",
+      paymentmode: "",
+      amountpaid: 0,
+      duedate: "",
+      course: "",
+      batch: "",
+      city:"",
+      pincode:"",
+      state:"",
+      gender:""
+  });
   const [selectedVisitor, setSelectedVisitor] = useState(null);
+
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
-    coures: "",
+    // coures: "",
     status: "new",
     source: "website"
   });
@@ -38,6 +51,47 @@ export default function Visitors() {
   useEffect(() => {
     filterData();
   }, [visitors, search, showTrash, sortField]);
+
+const convertstudent = async (e) => {
+  e.preventDefault();
+
+  try {
+    const formData = new FormData();
+
+    formData.append("courseprice", studentdata.courseprice);
+    formData.append("paymenttype", studentdata.paymenttype);
+    formData.append("paymentmode", studentdata.paymentmode);
+    formData.append("amountpaid", studentdata.amountpaid);
+    formData.append("duedate", studentdata.duedate);
+    formData.append("course", studentdata.course);
+    formData.append("city", studentdata.city);
+    formData.append("pincode", studentdata.pincode);
+    formData.append("state", studentdata.state);
+    formData.append("gender", studentdata.gender);
+
+    // 🔥 IMAGE APPEND
+    if (profileimage) {
+      formData.append("profileimage", profileimage);
+    }
+
+    await axios.post(
+      `http://localhost:8000/visitor/convertstudent/${selectedVisitor._id}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+
+    setShowConvertPopup(false);
+    fetchAll();
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   // 🔹 Fetch Data
   const fetchAll = async () => {
@@ -123,7 +177,7 @@ export default function Visitors() {
       await axios.post(
         `http://localhost:8000/visitor/activevisitor/${id}`,
         { isActive: !current },
-        { headers: { Authorization: `Bearer ${token}` } }
+        // { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchAll();
     } catch (err) {
@@ -188,7 +242,7 @@ export default function Visitors() {
               <th className="px-4 py-3 text-left">Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Course</th>
+              {/* <th>Course</th> */}
               <th>Status</th>
               <th>Source</th>
               <th>Action</th>
@@ -207,7 +261,7 @@ export default function Visitors() {
                 <td className="px-4 py-3">{visitor.name}</td>
                 <td>{visitor.email}</td>
                 <td>{visitor.phone}</td>
-                <td>{visitor.coures?.coursename || "N/A"}</td>
+                {/* <td>{visitor.coures?.coursename || "N/A"}</td> */}
                 <td>{visitor.status}</td>
                 <td>{visitor.source}</td>
                 <td>
@@ -221,7 +275,22 @@ export default function Visitors() {
                   >
                     <Pencil size={18} />
                   </button>
-
+                   <button
+                    // onClick={()=>{
+                    //   // setSelectedVisitor(visitor);
+                    //    setShowConvertPopup(true);
+                    //   setForm(visitor);
+                    //   // convertstudent(visitor);
+                    // }}
+                    onClick={()=>{
+             setSelectedVisitor(visitor);
+  setForm(visitor);
+  setShowConvertPopup(true);
+}}
+                    className="text-indigo-600 mr-3"
+                  >
+                    <RefreshCcw size={18} />
+                  </button>
                   <button
                     onClick={()=>toggleStatus(visitor._id, visitor.isActive)}
                     className="text-red-600"
@@ -241,7 +310,7 @@ export default function Visitors() {
           title="Add Visitor"
           form={form}
           setForm={setForm}
-          courses={courses}
+          // courses={courses}
           onSubmit={handleAdd}
           onClose={()=>setShowAddPopup(false)}
         />
@@ -252,25 +321,171 @@ export default function Visitors() {
           title="Edit Visitor"
           form={form}
           setForm={setForm}
-          courses={courses}
+          // courses={courses}
           onSubmit={handleEdit}
           onClose={()=>setShowEditPopup(false)}
         />
       )}
+     {showConvertPopup && (
+  <div className="fixed inset-0 bg-black/40 overflow-y-auto backdrop-blur-sm flex justify-center items-center z-50">
+    
+    <div className="bg-white w-full max-w-lg rounded-2xl p-6 shadow-2xl animate-fadeIn">
+      
+      <h2 className="text-xl font-bold mb-2 text-gray-800">
+        Convert to Student
+      </h2>
+
+      <p className="text-gray-600 mb-6">
+        Are you sure you want to convert{" "}
+        <span className="font-semibold text-indigo-600">
+          {form.name}
+        </span>{" "}
+        to a student?
+      </p>
+
+      <form
+        onSubmit={convertstudent}
+        className="space-y-4"
+      >
+        {/* Payment Type */}
+        <select
+          name="paymenttype"
+          value={studentdata.paymenttype}
+          onChange={(e) => setStudentData({...studentdata, paymenttype: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+        >
+          <option value="full">Full Payment</option>
+          <option value="installment">Installment</option>
+        </select>
+
+        {/* Payment Mode */}
+        <select
+          name="paymentmode"
+          value={studentdata.paymentmode}
+          onChange={(e) => setStudentData({...studentdata, paymentmode: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+        >
+          <option value="cash">Cash</option>
+          <option value="card">Card</option>
+          <option value="online">Online</option>
+        </select>
+
+        {/* Amount Fields */}
+        <div className="grid grid-cols-2 gap-4">
+          <input
+            type="number"
+            value={studentdata.amountpaid || 0}
+            onChange={(e) => setStudentData({...studentdata, amountpaid: e.target.value})}
+            placeholder="Amount Paid"
+            className="border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+          />
+          <input
+            type="number"
+            value={studentdata.courseprice || 0}
+            onChange={(e) => setStudentData({...studentdata, courseprice: e.target.value})}
+            placeholder="Total Amount"
+            className="border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+          />
+        </div>
+         <select
+            value={studentdata.course}
+            onChange={(e)=>setStudentData({...studentdata,course:e.target.value})}
+            className="w-full border px-3 py-2 rounded"
+          >
+            <option value="">Select Course</option>
+            {courses.map(c=>(
+              <option key={c._id} value={c._id}>
+                {c.coursename}
+              </option>
+            ))}
+          </select>
+        {/* Status */}
+        <select
+          name="status"
+          value={studentdata.status}
+          onChange={(e) => setStudentData({...studentdata, status: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+        >
+          <option value="paid">Paid</option>
+          <option value="pending">Pending</option>
+        </select>
+
+        {/* Due Date */}
+        <input
+          type="date"
+          value={studentdata.duedate}
+          onChange={(e) => setStudentData({...studentdata, duedate: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+        />
+         <input
+          type="text"
+          value={studentdata.city}
+          onChange={(e) => setStudentData({...studentdata, city: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+        placeholder="Enter City"/>
+         <input
+          type="text"
+          value={studentdata.pincode}
+          onChange={(e) => setStudentData({...studentdata, pincode: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+         placeholder="Enter Pincode"/>
+         
+         <input
+          type="text"
+          value={studentdata.state}
+          onChange={(e) => setStudentData({...studentdata, state: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+         placeholder="Enter State"/>
+         <input
+          type="text"
+          value={studentdata.gender}
+          onChange={(e) => setStudentData({...studentdata, gender: e.target.value})}
+          className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
+         placeholder="Enter Gender"/>
+          <div>
+              <label className="text-sm text-gray-600">Profile Image</label>
+              <input
+                type="file"
+                onChange={(e)=>setProfileImage(e.target.files[0])}
+                className="w-full"
+                required
+              />
+            </div>
+        <div className="flex justify-end gap-3 pt-4">
+          <button
+            type="button"
+
+            onClick={() => setShowConvertPopup(false)}
+            className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg transition"
+          >
+            Close
+          </button>
+
+          <button
+            type="submit"
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+          >
+            Convert
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
 
 /* 🔹 Popup Component */
-function VisitorPopup({ title, form, setForm, courses, onSubmit, onClose }) {
+function VisitorPopup({ title, form, setForm,  onSubmit, onClose }) {
   return (
     <div className="fixed inset-0  bg-opacity-40 flex justify-center items-center z-50">
       <div className="bg-white w-full max-w-md rounded-xl p-6 shadow-xl">
 
         <h2 className="text-xl font-bold mb-4">{title}</h2>
-
         <form onSubmit={onSubmit} className="space-y-4">
-
           <input
             placeholder="Name"
             value={form.name}
@@ -295,7 +510,7 @@ function VisitorPopup({ title, form, setForm, courses, onSubmit, onClose }) {
             required
           />
 
-          <select
+          {/* <select
             value={form.coures}
             onChange={(e)=>setForm({...form,coures:e.target.value})}
             className="w-full border px-3 py-2 rounded"
@@ -306,7 +521,7 @@ function VisitorPopup({ title, form, setForm, courses, onSubmit, onClose }) {
                 {c.coursename}
               </option>
             ))}
-          </select>
+          </select> */}
 
           <select
             value={form.status}
@@ -343,6 +558,7 @@ function VisitorPopup({ title, form, setForm, courses, onSubmit, onClose }) {
 
         </form>
       </div>
-    </div>
+      
+      </div>
   );
 }

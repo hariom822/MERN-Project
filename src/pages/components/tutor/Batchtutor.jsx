@@ -179,12 +179,12 @@ export default function Batch() {
           className="border px-4 py-2 rounded-lg w-64"
         />
 
-        <button
+        {/* <button
           onClick={()=>setShowAddPopup(true)}
           className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
         >
           + Add Batch
-        </button>
+        </button> */}
       </div>
 
       {/* TABLE */}
@@ -199,7 +199,7 @@ export default function Batch() {
               <th>Status</th>
               <th>Start</th>
               <th>End</th>
-              <th>Action</th>
+              {/* <th>Action</th> */}
             </tr>
           </thead>
 
@@ -225,7 +225,7 @@ export default function Batch() {
                 </td>
                 <td>{new Date(batch.startDate).toLocaleDateString()}</td>
                 <td>{new Date(batch.endDate).toLocaleDateString()}</td>
-                <td>
+                {/* <td>
                   <button
                     onClick={()=>{
                       setSelectedBatch(batch);
@@ -242,7 +242,7 @@ export default function Batch() {
                   >
                     {batch.isActive ? <Power size={18} /> : <RotateCcw size={18} />}
                   </button>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>

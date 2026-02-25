@@ -54,15 +54,7 @@ export default function Sidebar({ closeSidebar }) {
           </li>
 
           <li>
-            <button
-              onClick={() => {
-                navigate("/employee");
-                closeSidebar();
-              }}
-              className={menuItemClass("/employee")}
-            >
-              Employee
-            </button>
+         
           </li>
 
           <li>
@@ -100,17 +92,6 @@ export default function Sidebar({ closeSidebar }) {
               Student
             </button>
           </li>
-           <li>
-            <button
-              onClick={() => {
-                navigate("/tutors");
-                closeSidebar();
-              }}
-              className={menuItemClass("/tutors")}
-            >
-              tutors
-            </button>
-          </li>
           <li>
             <button
               onClick={() => {
@@ -131,6 +112,17 @@ export default function Sidebar({ closeSidebar }) {
               className={menuItemClass("/visitors")}
             >
               Visitor
+            </button>
+          </li>
+           <li>
+            <button
+              onClick={() => {
+                navigate("/fees");
+                closeSidebar();
+              }}
+              className={menuItemClass("/fees")}
+            >
+              feesh
             </button>
           </li>
           <li>
